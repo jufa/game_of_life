@@ -10,8 +10,8 @@ Ruby implementation of [Conway's Game of Life](https://en.wikipedia.org/wiki/Con
 ```
 TerminalConway.new(params)
 
-width: integer
-height: integer
+rows: integer
+columns: integer
 fill_ratio: float 0..1 initial fraction of spaces populated by live cells
 rate: seconds between generations
 patterns: 2D array of string filled with empty space or * to initialize cell pattern, if defined, overrides other params other than rate

@@ -10,14 +10,14 @@ class ConwayWorld
   MAGENTA_CURSOR = "\033[35m"
   GREEN_CURSOR = "\033[32m"
 
-  def initialize(width: 5, height: 6, fill_ratio: 0.3, pattern: nil)
+  def initialize(columns: 5, rows: 6, fill_ratio: 0.3, pattern: nil)
     if pattern
       @world = pattern
       @rows = world.size
       @columns = world.first.size
     else
-      @columns = width
-      @rows = height
+      @columns = columns
+      @rows = rows
       @world = Array.new(@rows) { Array.new(@columns) }
       fill(fill_ratio)
     end
@@ -74,9 +74,17 @@ class ConwayWorld
   def fill(ratio)
     @world.map! do |row|
       row.map! do |cell|
-       rand < ratio ? CELL : EMPTY
+        rand < ratio ? CELL : EMPTY
       end
     end
+  end
+
+  def glider(row:0, column:0)
+    r = row
+    c = column
+    @world[r + 0][c..(c + 2)] = [EMPTY, CELL, EMPTY]
+    @world[r + 1][c..(c + 2)] = [EMPTY, EMPTY, CELL]
+    @world[r + 2][c..(c + 2)] = [CELL, CELL, CELL]
   end
 
   def neighbour_count(r, c)
@@ -84,20 +92,8 @@ class ConwayWorld
     [-1, 0, 1].each do |dr|
       [-1, 0, 1].each do |dc|
         next if dr == 0 && dc == 0
-        if c + dc < 0
-          cpos = @columns - 1
-        elsif c + dc >= @columns
-          cpos = 0
-        else
-          cpos = c + dc
-        end
-        if r + dr < 0
-          rpos = @rows - 1
-        elsif r + dr >= @rows
-          rpos = 0
-        else
-          rpos = r + dr
-        end
+        cpos = ( c + dc ) % @columns
+        rpos = ( r + dr ) % @rows
         count = count + 1 if [CELL, NEW_CELL].include? @world[rpos][cpos]
       end
     end
@@ -106,8 +102,8 @@ class ConwayWorld
 end
 
 class TerminalConway
-  def initialize(width: 40, height: 20, fill_ratio: 0.5, rate: 0.02, pattern: nil)
-    world = ConwayWorld.new width: width, height: height, fill_ratio: fill_ratio, pattern: pattern
+  def initialize(columns: 40, rows: 20, fill_ratio: 0.3, rate: 0.02, pattern: nil)
+    world = ConwayWorld.new columns: columns, rows: rows, fill_ratio: fill_ratio, pattern: pattern
     world.print_world(title: "Initial generation", overwriteable_last: false)
 
     generation = 0
